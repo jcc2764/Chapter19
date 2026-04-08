@@ -1,162 +1,161 @@
-//Header File Binary Search Tree
+// Header File Binary Search Tree
 #ifndef H_binaryTree
 #define H_binaryTree
 
 #include <iostream>
 
-using namespace std; 
+using namespace std;
 
-    //Definition of the Node
+// Definition of the Node
 template <class elemType>
 struct nodeType
-{ 
+{
     elemType info;
     nodeType<elemType> *lLink;
     nodeType<elemType> *rLink;
 };
-	
-    //Definition of the class
+
+// Definition of the class
 template <class elemType>
 class binaryTreeType
 {
 public:
-    const binaryTreeType<elemType>& operator=
-                 (const binaryTreeType<elemType>&); 
-      //Overload the assignment operator.
+    const binaryTreeType<elemType> &operator=(const binaryTreeType<elemType> &);
+    // Overload the assignment operator.
 
     bool isEmpty() const;
-      //Function to determine whether the binary tree is empty.
-      //Postcondition: Returns true if the binary tree is empty;
-      //               otherwise, returns false.
+    // Function to determine whether the binary tree is empty.
+    // Postcondition: Returns true if the binary tree is empty;
+    //                otherwise, returns false.
 
     void inorderTraversal() const;
-      //Function to do an inorder traversal of the binary tree.
-      //Postcondition: Nodes are printed in inorder sequence.
+    // Function to do an inorder traversal of the binary tree.
+    // Postcondition: Nodes are printed in inorder sequence.
 
     void preorderTraversal() const;
-      //Function to do a preorder traversal of the binary tree.
-      //Postcondition: Nodes are printed in preorder sequence.
+    // Function to do a preorder traversal of the binary tree.
+    // Postcondition: Nodes are printed in preorder sequence.
 
     void postorderTraversal() const;
-      //Function to do a postorder traversal of the binary tree.
-      //Postcondition: Nodes are printed in postorder sequence.
+    // Function to do a postorder traversal of the binary tree.
+    // Postcondition: Nodes are printed in postorder sequence.
 
     int treeHeight() const;
-      //Function to determine the height of a binary tree.
-      //Postcondition: Returns the height of the binary tree.
+    // Function to determine the height of a binary tree.
+    // Postcondition: Returns the height of the binary tree.
 
     int treeNodeCount() const;
-      //Function to determine the number of nodes in a 
-      //binary tree.
-      //Postcondition: Returns the number of nodes in the 
-      //               binary tree.
+    // Function to determine the number of nodes in a
+    // binary tree.
+    // Postcondition: Returns the number of nodes in the
+    //                binary tree.
 
     int treeLeavesCount() const;
-      //Function to determine the number of leaves in a 
-      //binary tree.
-      //Postcondition: Returns the number of leaves in the 
-      //               binary tree.
+    // Function to determine the number of leaves in a
+    // binary tree.
+    // Postcondition: Returns the number of leaves in the
+    //                binary tree.
 
     void destroyTree();
-      //Function to destroy the binary tree.
-      //Postcondition: Memory space occupied by each node 
-      //               is deallocated.
-      //               root = nullptr;
+    // Function to destroy the binary tree.
+    // Postcondition: Memory space occupied by each node
+    //                is deallocated.
+    //                root = nullptr;
 
-    virtual bool search(const elemType& searchItem) const = 0;
-      //Function to determine if searchItem is in the binary 
-      //tree.
-      //Postcondition: Returns true if searchItem is found in 
-      //               the binary tree; otherwise, returns 
-      //               false.
+    virtual bool search(const elemType &searchItem) const = 0;
+    // Function to determine if searchItem is in the binary
+    // tree.
+    // Postcondition: Returns true if searchItem is found in
+    //                the binary tree; otherwise, returns
+    //                false.
 
-    virtual void insert(const elemType& insertItem) = 0;
-      //Function to insert insertItem in the binary tree.
-      //Postcondition: If there is no node in the binary tree
-      //               that has the same info as insertItem, a
-      //               node with the info insertItem is created
-      //               and inserted in the binary search tree.
+    virtual void insert(const elemType &insertItem) = 0;
+    // Function to insert insertItem in the binary tree.
+    // Postcondition: If there is no node in the binary tree
+    //                that has the same info as insertItem, a
+    //                node with the info insertItem is created
+    //                and inserted in the binary search tree.
 
-    virtual void deleteNode(const elemType& deleteItem) = 0;
-      //Function to delete deleteItem from the binary tree 
-      //Postcondition: If a node with the same info as 
-      //               deleteItem is found, it is deleted from
-      //               the binary tree.
-      //               If the binary tree is empty or 
-      //               deleteItem is not in the binary tree, 
-      //               an appropriate message is printed.
+    virtual void deleteNode(const elemType &deleteItem) = 0;
+    // Function to delete deleteItem from the binary tree
+    // Postcondition: If a node with the same info as
+    //                deleteItem is found, it is deleted from
+    //                the binary tree.
+    //                If the binary tree is empty or
+    //                deleteItem is not in the binary tree,
+    //                an appropriate message is printed.
 
-    binaryTreeType(const binaryTreeType<elemType>& otherTree); 
-      //Copy constructor
+    binaryTreeType(const binaryTreeType<elemType> &otherTree);
+    // Copy constructor
 
-    binaryTreeType();   
-      //Default constructor
+    binaryTreeType();
+    // Default constructor
 
-    ~binaryTreeType();   
-      //Destructor
+    ~binaryTreeType();
+    // Destructor
 
 protected:
-    nodeType<elemType>  *root;
+    nodeType<elemType> *root;
 
 private:
-    void copyTree(nodeType<elemType>* &copiedTreeRoot,
-                  nodeType<elemType>* otherTreeRoot);
-      //Makes a copy of the binary tree to which 
-      //otherTreeRoot points. 
-      //Postcondition: The pointer copiedTreeRoot points to
-      //               the root of the copied binary tree.
+    void copyTree(nodeType<elemType> *&copiedTreeRoot,
+                  nodeType<elemType> *otherTreeRoot);
+    // Makes a copy of the binary tree to which
+    // otherTreeRoot points.
+    // Postcondition: The pointer copiedTreeRoot points to
+    //                the root of the copied binary tree.
 
-    void destroy(nodeType<elemType>* &p);
-      //Function to destroy the binary tree to which p points. 
-      //Postcondition: Memory space occupied by each node, in 
-      //               the binary tree to which p points, is 
-      //               deallocated.
-      //               p = nullptr;
+    void destroy(nodeType<elemType> *&p);
+    // Function to destroy the binary tree to which p points.
+    // Postcondition: Memory space occupied by each node, in
+    //                the binary tree to which p points, is
+    //                deallocated.
+    //                p = nullptr;
 
     void inorder(nodeType<elemType> *p) const;
-      //Function to do an inorder traversal of the binary
-      //tree to which p points.  
-      //Postcondition: Nodes of the binary tree, to which p
-      //               points, are printed in inorder sequence.
+    // Function to do an inorder traversal of the binary
+    // tree to which p points.
+    // Postcondition: Nodes of the binary tree, to which p
+    //                points, are printed in inorder sequence.
 
     void preorder(nodeType<elemType> *p) const;
-      //Function to do a preorder traversal of the binary
-      //tree to which p points.  
-      //Postcondition: Nodes of the binary tree, to which p
-      //               points, are printed in preorder 
-      //               sequence.
+    // Function to do a preorder traversal of the binary
+    // tree to which p points.
+    // Postcondition: Nodes of the binary tree, to which p
+    //                points, are printed in preorder
+    //                sequence.
 
     void postorder(nodeType<elemType> *p) const;
-      //Function to do a postorder traversal of the binary
-      //tree to which p points.  
-      //Postcondition: Nodes of the binary tree, to which p
-      //               points, are printed in postorder 
-      //               sequence.
+    // Function to do a postorder traversal of the binary
+    // tree to which p points.
+    // Postcondition: Nodes of the binary tree, to which p
+    //                points, are printed in postorder
+    //                sequence.
 
     int height(nodeType<elemType> *p) const;
-      //Function to determine the height of the binary tree
-      //to which p points. 
-      //Postcondition: Height of the binary tree to which 
-      //               p points is returned.
+    // Function to determine the height of the binary tree
+    // to which p points.
+    // Postcondition: Height of the binary tree to which
+    //                p points is returned.
 
     int max(int x, int y) const;
-      //Function to determine the larger of x and y.
-      //Postcondition: Returns the larger of x and y.
+    // Function to determine the larger of x and y.
+    // Postcondition: Returns the larger of x and y.
 
     int nodeCount(nodeType<elemType> *p) const;
-      //Function to determine the number of nodes in 
-      //the binary tree to which p points. 
-      //Postcondition: The number of nodes in the binary 
-      //               tree to which p points is returned.
+    // Function to determine the number of nodes in
+    // the binary tree to which p points.
+    // Postcondition: The number of nodes in the binary
+    //                tree to which p points is returned.
 
     int leavesCount(nodeType<elemType> *p) const;
-      //Function to determine the number of leaves in  
-      //the binary tree to which p points 
-      //Postcondition: The number of leaves in the binary 
-      //               tree to which p points is returned.
+    // Function to determine the number of leaves in
+    // the binary tree to which p points
+    // Postcondition: The number of leaves in the binary
+    //                tree to which p points is returned.
 };
 
-	//Definition of member functions
+// Definition of member functions
 
 template <class elemType>
 binaryTreeType<elemType>::binaryTreeType()
@@ -207,9 +206,8 @@ int binaryTreeType<elemType>::treeLeavesCount() const
 }
 
 template <class elemType>
-void  binaryTreeType<elemType>::copyTree
-                       (nodeType<elemType>* &copiedTreeRoot,
-                        nodeType<elemType>* otherTreeRoot)
+void binaryTreeType<elemType>::copyTree(nodeType<elemType> *&copiedTreeRoot,
+                                        nodeType<elemType> *otherTreeRoot)
 {
     if (otherTreeRoot == nullptr)
         copiedTreeRoot = nullptr;
@@ -220,11 +218,10 @@ void  binaryTreeType<elemType>::copyTree
         copyTree(copiedTreeRoot->lLink, otherTreeRoot->lLink);
         copyTree(copiedTreeRoot->rLink, otherTreeRoot->rLink);
     }
-} //end copyTree
+} // end copyTree
 
 template <class elemType>
-void binaryTreeType<elemType>::inorder
-                              (nodeType<elemType> *p) const
+void binaryTreeType<elemType>::inorder(nodeType<elemType> *p) const
 {
     if (p != nullptr)
     {
@@ -235,8 +232,7 @@ void binaryTreeType<elemType>::inorder
 }
 
 template <class elemType>
-void binaryTreeType<elemType>::preorder
-                              (nodeType<elemType> *p) const
+void binaryTreeType<elemType>::preorder(nodeType<elemType> *p) const
 {
     if (p != nullptr)
     {
@@ -247,39 +243,38 @@ void binaryTreeType<elemType>::preorder
 }
 
 template <class elemType>
-void binaryTreeType<elemType>::postorder
-                              (nodeType<elemType> *p) const
+void binaryTreeType<elemType>::postorder(nodeType<elemType> *p) const
 {
     if (p != nullptr)
     {
         postorder(p->lLink);
         postorder(p->rLink);
         cout << p->info << " ";
-    }		
+    }
 }
 
-   //Overload the assignment operator
+// Overload the assignment operator
 template <class elemType>
-const binaryTreeType<elemType>& binaryTreeType<elemType>::
-        operator=(const binaryTreeType<elemType>& otherTree)
-{ 
-    if (this != &otherTree) //avoid self-copy
+const binaryTreeType<elemType> &binaryTreeType<elemType>::
+operator=(const binaryTreeType<elemType> &otherTree)
+{
+    if (this != &otherTree) // avoid self-copy
     {
-        if (root != nullptr)   //if the binary tree is not empty,
-                            //destroy the binary tree
+        if (root != nullptr) // if the binary tree is not empty,
+                             // destroy the binary tree
             destroy(root);
 
-        if (otherTree.root == nullptr) //otherTree is empty
+        if (otherTree.root == nullptr) // otherTree is empty
             root = nullptr;
         else
             copyTree(root, otherTree.root);
-    }//end else
+    } // end else
 
-    return *this; 
+    return *this;
 }
 
 template <class elemType>
-void  binaryTreeType<elemType>::destroy(nodeType<elemType>* &p)
+void binaryTreeType<elemType>::destroy(nodeType<elemType> *&p)
 {
     if (p != nullptr)
     {
@@ -291,32 +286,30 @@ void  binaryTreeType<elemType>::destroy(nodeType<elemType>* &p)
 }
 
 template <class elemType>
-void  binaryTreeType<elemType>::destroyTree()
+void binaryTreeType<elemType>::destroyTree()
 {
     destroy(root);
 }
 
-	//copy constructor
+// copy constructor
 template <class elemType>
-binaryTreeType<elemType>::binaryTreeType
-                (const binaryTreeType<elemType>& otherTree)
+binaryTreeType<elemType>::binaryTreeType(const binaryTreeType<elemType> &otherTree)
 {
-    if (otherTree.root == nullptr) //otherTree is empty
+    if (otherTree.root == nullptr) // otherTree is empty
         root = nullptr;
     else
         copyTree(root, otherTree.root);
 }
 
-    //Destructor
+// Destructor
 template <class elemType>
 binaryTreeType<elemType>::~binaryTreeType()
 {
     destroy(root);
 }
 
-template<class elemType>
-int binaryTreeType<elemType>::height
-                             (nodeType<elemType> *p) const
+template <class elemType>
+int binaryTreeType<elemType>::height(nodeType<elemType> *p) const
 {
     if (p == nullptr)
         return 0;
@@ -333,15 +326,11 @@ int binaryTreeType<elemType>::max(int x, int y) const
         return y;
 }
 
-
-
-
-template<class elemType>
+template <class elemType>
 int binaryTreeType<elemType>::nodeCount(nodeType<elemType> *p) const
 {
- // TODO: Define method nodeCount
+    // TODO: Define method nodeCount
     return 0;
 }
-    
 
 #endif
