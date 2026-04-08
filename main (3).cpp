@@ -1,3 +1,7 @@
+//Name: Joshua Clark
+//Date 04.07.2026
+//Purpose: Store customer information and their rented DVDs using a binary tree
+
 #include <iostream>
 
 using namespace std;
