@@ -8,6 +8,7 @@
 #define H_customerBTreeType
 
 #include <string>
+#include <fstream>   
 #include "binarySearchTree.h"
 #include "customer.h"
 
@@ -87,6 +88,12 @@ public:
         Returns a pointer to the customer or nullptr if not found.
     */
     customerType* getCustomerByName(const string& fullName);
+
+    // saveCustomersToFile
+    // Updates the Customers.TXT 
+    // Updates the custDat.txt files
+    void saveCustomersToFile(ofstream& out);
+    void saveRentalsToFile(ofstream& out);
 
 private:
 
