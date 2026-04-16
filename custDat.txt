@@ -1,6 +1,22 @@
-Donald Duck 1 
-Mickey Mouse 2 
-Minne Mouse 3 
-Goofy Dog 4 
-Doc  Dwarf 5 
-Grumpy Old 6
+Lucas Carter 1 2 Inception Matrix
+Emma Brooks 2 1 Moana
+Michael Smith 3 3 Dune Interstellar Arrival
+Sarah Johnson 4 2 Frozen Coco
+Robert Williams 5 0
+Emily Brown 6 4 Shrek Gladiator Avatar Titanic
+David Miller 7 1 Jaws
+Olivia Davis 8 3 Alien Aliens Prometheus
+James Wilson 9 2 Braveheart Gladiator
+Sophia Taylor 10 1 Titanic
+Benjamin Harris 11 3 Matrix Terminator Shrek
+Ava Martinez 12 2 Avatar Inception
+William Clark 13 0
+Mia Lewis 14 1 Moana
+Elijah Walker 15 2 Interstellar Gravity
+Charlotte Hall 16 3 Coco Frozen Encanto
+Daniel Young 17 1 Gladiator
+Amelia King 18 4 Alien Aliens Prometheus Covenant
+Matthew Wright 19 2 Titanic Avatar
+Harper Scott 20 1 Dune
+
+
