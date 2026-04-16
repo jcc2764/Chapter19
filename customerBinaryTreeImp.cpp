@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+#include <fstream>
 #include "customerBinaryTree.h"
 
 using namespace std;
@@ -230,4 +231,58 @@ customerType* customerBTreeType::getCustomerByName(const string& fullName)
     searchByNameHelper(this->root, targetLower, result);
 
     return result;
+}
+
+// ===============================
+// SAVE CUSTOMER BASIC DATA
+// ===============================
+static void saveCustHelper(nodeType<customerType>* p, ofstream& out)
+{
+    if (!p) return;
+
+    saveCustHelper(p->lLink, out);
+
+    // Address is already stored as one string in customerType
+    out << p->info.getAcctNo() << " "
+        << p->info.getFirstName() << " "
+        << p->info.getLastName() << " "
+        << p->info.getAddress() << " "
+        << p->info.getPhone() << " "
+        << p->info.getMemberSince() << "\n";
+
+    saveCustHelper(p->rLink, out);
+}
+
+void customerBTreeType::saveCustomersToFile(ofstream& out)
+{
+    saveCustHelper(this->root, out);
+}
+
+// ===============================
+// SAVE CUSTOMER RENTAL DATA
+// ===============================
+static void saveRentHelper(nodeType<customerType>* p, ofstream& out)
+{
+    if (!p) return;
+
+    saveRentHelper(p->lLink, out);
+
+    out << p->info.getFirstName() << " "
+        << p->info.getLastName() << " "
+        << p->info.getAcctNo() << " "
+        << p->info.getNoOfRentals() << " ";
+
+    // redirect cout temporarily so printRentedDVD writes into the file
+    std::streambuf* oldBuf = cout.rdbuf(out.rdbuf());
+    p->info.printRentedDVD();   // prints titles separated by spaces
+    cout.rdbuf(oldBuf);
+
+    out << "\n";
+
+    saveRentHelper(p->rLink, out);
+}
+
+void customerBTreeType::saveRentalsToFile(ofstream& out)
+{
+    saveRentHelper(this->root, out);
 }
