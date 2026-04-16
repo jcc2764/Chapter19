@@ -10,6 +10,10 @@
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
+#include <cctype>
+#include <vector>       
+#include <sstream>
 
 using namespace std;
 
@@ -25,20 +29,17 @@ using namespace std;
 //
 customerBTreeType customerDB;
 
+// Next available ID (determined from Customer.txt)
+int nextID = 0;
+
 
 // ===============================
-// DUMMY PLACEHOLDER FUNCTIONS
-// (These are not implemented yet)
+// FORWARD DECLARATIONS
 // ===============================
-void dummyListCustomers()      { cout << ">>> [DUMMY] Listing customers...\n"; }
-void dummyAddCustomer()        { cout << ">>> [DUMMY] Adding customer...\n"; }
-void dummyEditCustomer()       { cout << ">>> [DUMMY] Editing customer...\n"; }
-void dummyDeleteCustomer()     { cout << ">>> [DUMMY] Deleting customer...\n"; }
-void dummySearchByID()         { cout << ">>> [DUMMY] Searching by Customer ID...\n"; }
-void dummySearchByName()       { cout << ">>> [DUMMY] Searching by Customer Name...\n"; }
-void dummyRentDVD()            { cout << ">>> [DUMMY] Renting DVD...\n"; }
-void dummyReturnDVD()          { cout << ">>> [DUMMY] Returning DVD...\n"; }
-void dummyListAllRented()      { cout << ">>> [DUMMY] Listing all rented DVDs...\n"; }
+void addCustomer();
+void editCustomer();
+void deleteCustomer();
+void saveAllData();
 
 
 // ===============================
@@ -47,12 +48,7 @@ void dummyListAllRented()      { cout << ">>> [DUMMY] Listing all rented DVDs...
 //
 // Expected format per line:
 //   ID First Last Street# StreetName StreetType City State Zip Phone MemberSince
-//
-// Example:
-//   1 John Doe 3102 Bree Street SomeTown ST 00000 1111111111 02/02/2000
-//
-// This function builds customer objects and inserts them into the BST.
-//
+// ===============================
 void loadCustomersFromCustomerTxt()
 {
     ifstream infile("Customer.txt");
@@ -69,7 +65,6 @@ void loadCustomersFromCustomerTxt()
     string city, state, zip;
     string phone, memberSince;
 
-    // Read each customer record
     while (infile >> id
                   >> first
                   >> last
@@ -82,21 +77,23 @@ void loadCustomersFromCustomerTxt()
                   >> phone
                   >> memberSince)
     {
-        // Create customer object
         customerType cust(first, last, id);
 
-        // Build full address string
+        // Build address (NO COMMAS)
         string address = streetNum + " " + streetName + " " + streetType +
-                         ", " + city + ", " + state + " " + zip;
+                         " " + city + " " + state + " " + zip;
 
-        // Store extended info
         cust.setAddress(address);
         cust.setPhone(phone);
         cust.setMemberSince(memberSince);
 
-        // Insert into BST
         customerDB.insert(cust);
+
+        if (id > nextID)
+            nextID = id;
     }
+
+    nextID++; // next available ID
 
     infile.close();
 }
@@ -105,15 +102,6 @@ void loadCustomersFromCustomerTxt()
 // ===============================
 // LOAD DVD RENTALS FROM custDat.txt
 // ===============================
-//
-// Expected format per line:
-//   first last acctNo numDVDs dvd1 dvd2 dvd3 ...
-//
-// Example:
-//   John Doe 1 3 Matrix Terminator Shrek
-//
-// This function finds the matching customer and loads their rentals.
-//
 void loadDVDsFromCustDat()
 {
     ifstream infile("custDat.txt");
@@ -128,14 +116,12 @@ void loadDVDsFromCustDat()
     int acctNo;
     int numDVDs;
 
-    // Read each rental record
     while (infile >> first >> last >> acctNo >> numDVDs)
     {
         customerType* cust = customerDB.getCustomerById(acctNo);
 
-        if (cust == nullptr)
+        if (!cust)
         {
-            // Customer not found — skip DVD titles
             for (int i = 0; i < numDVDs; ++i)
             {
                 string dummy;
@@ -144,7 +130,6 @@ void loadDVDsFromCustDat()
         }
         else
         {
-            // Load each DVD title into the customer's rental tree
             for (int i = 0; i < numDVDs; ++i)
             {
                 string title;
@@ -161,9 +146,6 @@ void loadDVDsFromCustDat()
 // ===============================
 // INPUT VALIDATION HELPER
 // ===============================
-//
-// Ensures user enters a valid integer within a range.
-//
 int getValidatedChoice(int min, int max) {
     int choice;
 
@@ -185,15 +167,12 @@ int getValidatedChoice(int min, int max) {
 // ===============================
 // UI HELPERS
 // ===============================
-
-// Prints a formatted header bar
 void header(const string& title) {
     cout << "====================================================\n";
     cout << "                 " << title << "\n";
     cout << "====================================================\n";
 }
 
-// Pauses screen until user presses ENTER
 void pauseScreen() {
     cout << "\nPress ENTER to continue...";
     cin.clear();
@@ -203,10 +182,312 @@ void pauseScreen() {
 
 
 // ===============================
+// FAILSAFE INPUT HELPERS
+// ===============================
+string getOneWord(const string& prompt)
+{
+    string input;
+    while (true)
+    {
+        cout << prompt;
+        cin >> input;
+
+        if (input.find(' ') == string::npos)
+            return input;
+
+        cout << "ERROR: This field must be ONE word.\n";
+    }
+}
+
+bool isValidState(const string& st)
+{
+    static const string states[50] = {
+        "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+        "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+        "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+        "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+        "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
+    };
+
+    for (const string& s : states)
+        if (st == s)
+            return true;
+
+    return false;
+}
+
+string getStateCode()
+{
+    string st;
+
+    while (true)
+    {
+        cout << "Enter State (2 letters): ";
+        cin >> st;
+
+        if (st.length() == 2)
+        {
+            st[0] = toupper(st[0]);
+            st[1] = toupper(st[1]);
+
+            if (isValidState(st))
+                return st;
+        }
+
+        cout << "ERROR: Invalid state code.\n";
+    }
+}
+
+string getZip()
+{
+    string zip;
+
+    while (true)
+    {
+        cout << "Enter ZIP (5 digits): ";
+        cin >> zip;
+
+        if (zip.length() == 5 &&
+            all_of(zip.begin(), zip.end(), ::isdigit))
+            return zip;
+
+        cout << "ERROR: ZIP must be exactly 5 digits.\n";
+    }
+}
+
+string getPhone()
+{
+    string ph;
+
+    while (true)
+    {
+        cout << "Enter Phone (10 digits): ";
+        cin >> ph;
+
+        if (ph.length() == 10 &&
+            all_of(ph.begin(), ph.end(), ::isdigit))
+            return ph;
+
+        cout << "ERROR: Phone must be exactly 10 digits.\n";
+    }
+}
+
+bool isValidDate(const string& d)
+{
+    if (d.length() != 10) return false;
+    if (d[2] != '/' || d[5] != '/') return false;
+
+    string mm = d.substr(0,2);
+    string dd = d.substr(3,2);
+    string yyyy = d.substr(6,4);
+
+    if (!all_of(mm.begin(), mm.end(), ::isdigit)) return false;
+    if (!all_of(dd.begin(), dd.end(), ::isdigit)) return false;
+    if (!all_of(yyyy.begin(), yyyy.end(), ::isdigit)) return false;
+
+    int month = stoi(mm);
+    int day   = stoi(dd);
+
+    return (month >= 1 && month <= 12 &&
+            day >= 1 && day <= 31);
+}
+
+string getDate(const string& prompt)
+{
+    string d;
+
+    while (true)
+    {
+        cout << prompt;
+        cin >> d;
+
+        if (isValidDate(d))
+            return d;
+
+        cout << "ERROR: Invalid date format. Use MM/DD/YYYY.\n";
+    }
+}
+
+
+// ===============================
+// SAVE ALL DATA BACK TO FILES
+// ===============================
+void saveAllData()
+{
+    // Save Customer.txt
+    ofstream out1("Customer.txt");
+    customerDB.saveCustomersToFile(out1);
+    out1.close();
+
+    // Save custDat.txt
+    ofstream out2("custDat.txt");
+    customerDB.saveRentalsToFile(out2);
+    out2.close();
+}
+
+
+// ===============================
+// ADD CUSTOMER
+// ===============================
+void addCustomer()
+{
+    system("clear");
+    header("ADD CUSTOMER");
+
+    string first = getOneWord("Enter First Name: ");
+    string last  = getOneWord("Enter Last Name: ");
+
+    string streetNum  = getOneWord("Enter Street Number: ");
+    string streetName = getOneWord("Enter Street Name: ");
+    string streetType = getOneWord("Enter Street Type (e.g., Road, Lane): ");
+    string city       = getOneWord("Enter City: ");
+    string state      = getStateCode();
+    string zip        = getZip();
+    string phone      = getPhone();
+    string memberSince = getDate("Enter Member Since (MM/DD/YYYY): ");
+
+    string address = streetNum + " " + streetName + " " + streetType +
+                     " " + city + " " + state + " " + zip;
+
+    customerType cust(first, last, nextID++);
+    cust.setAddress(address);
+    cust.setPhone(phone);
+    cust.setMemberSince(memberSince);
+
+    customerDB.insert(cust);
+
+    saveAllData();
+
+    cout << "\nCustomer added successfully.\n";
+    pauseScreen();
+}
+
+
+// ===============================
+// EDIT CUSTOMER (PRE-FILLED)
+// ===============================
+void editCustomer()
+{
+    system("clear");
+    header("EDIT CUSTOMER");
+
+    int id;
+    cout << "Enter Customer ID to edit: ";
+
+    while (!(cin >> id))
+    {
+        cout << "Invalid ID. Try again: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    customerType* cust = customerDB.getCustomerById(id);
+
+    if (!cust)
+    {
+        cout << "Customer NOT FOUND.\n";
+        pauseScreen();
+        return;
+    }
+
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    auto getOptional = [&](const string& prompt, const string& current) {
+        cout << prompt << " [" << current << "]: ";
+        string input;
+        getline(cin, input);
+        if (input.empty())
+            return current;
+        return input;
+    };
+
+    cout << "\nEditing customer:\n";
+    cust->printFullInfo();
+    cout << "\n";
+
+    string first = getOptional("Enter New First Name", cust->getFirstName());
+    string last  = getOptional("Enter New Last Name", cust->getLastName());
+
+    // Address parsing is crude but works for your format
+    string addr = cust->getAddress();
+    vector<string> parts;
+    string temp;
+    stringstream ss(addr);
+    while (ss >> temp) parts.push_back(temp);
+
+    string streetNum  = getOptional("Enter New Street Number", parts[0]);
+    string streetName = getOptional("Enter New Street Name", parts[1]);
+    string streetType = getOptional("Enter New Street Type", parts[2]);
+    string city       = getOptional("Enter New City", parts[3]);
+    string state      = getOptional("Enter New State", parts[4]);
+    string zip        = getOptional("Enter New ZIP", parts[5]);
+
+    string phone      = getOptional("Enter New Phone", cust->getPhone());
+    string memberSince = getOptional("Enter New Member Since", cust->getMemberSince());
+
+    string newAddress = streetNum + " " + streetName + " " + streetType +
+                        " " + city + " " + state + " " + zip;
+
+    cust->setName(first, last);
+    cust->setAddress(newAddress);
+    cust->setPhone(phone);
+    cust->setMemberSince(memberSince);
+
+    saveAllData();
+
+    cout << "\nCustomer updated successfully.\n";
+    pauseScreen();
+}
+
+
+// ===============================
+// DELETE CUSTOMER
+// ===============================
+void deleteCustomer()
+{
+    system("clear");
+    header("DELETE CUSTOMER");
+
+    int id;
+    cout << "Enter Customer ID to delete: ";
+    while (!(cin >> id)) {
+        cout << "Invalid ID. Try again: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    customerType* cust = customerDB.getCustomerById(id);
+
+    if (!cust) {
+        cout << "Customer NOT FOUND.\n";
+        pauseScreen();
+        return;
+    }
+
+    cout << "\nAre you sure you want to delete this customer? (y/n): ";
+    char confirm;
+    cin >> confirm;
+    if (tolower(confirm) != 'y') {
+        cout << "Delete cancelled.\n";
+        pauseScreen();
+        return;
+    }
+
+    // build a proper key using the actual customer info
+    customerType key(cust->getFirstName(), cust->getLastName(), id);
+    customerDB.deleteNode(key);
+
+    saveAllData();
+
+    cout << "Customer deleted.\n";
+    pauseScreen();
+}
+
+
+// ===============================
 // MENU DISPLAY FUNCTIONS
 // ===============================
-
-// Main menu
 void showMainMenu() {
     system("clear");
     header("DVD STORE SYSTEM");
@@ -220,7 +501,6 @@ void showMainMenu() {
     cout << "====================================================\n";
 }
 
-// Customer management submenu
 void showCustomerListMenu() {
     header("CUSTOMER MANAGEMENT");
     cout << "1. Add Customer\n";
@@ -230,7 +510,6 @@ void showCustomerListMenu() {
     cout << "====================================================\n";
 }
 
-// Search submenu
 void showSearchMenu() {
     header("SEARCH CUSTOMERS");
     cout << "1. Search by Customer ID\n";
@@ -243,15 +522,11 @@ void showSearchMenu() {
 // ===============================
 // CUSTOMER MANAGEMENT LOOP
 // ===============================
-//
-// If showListFirst = true, prints the customer list before showing menu.
-//
 void customerManagementLoop(bool showListFirst) {
     if (showListFirst) {
         system("clear");
         header("CUSTOMER LIST");
 
-        // Column headers
         cout << left
              << setw(5)  << "ID"
              << setw(12) << "First"
@@ -264,7 +539,6 @@ void customerManagementLoop(bool showListFirst) {
 
         cout << "-----------------------------------------------------------------------------------------------" << endl;
 
-        // Print all customers (inorder traversal)
         customerDB.inorderTraversal();
         cout << endl;
     }
@@ -278,12 +552,11 @@ void customerManagementLoop(bool showListFirst) {
         header("CUSTOMER MANAGEMENT");
 
         switch (sub) {
-        case 1: dummyAddCustomer();   break;
-        case 2: dummyEditCustomer();  break;
-        case 3: dummyDeleteCustomer();break;
+        case 1: addCustomer();   break;
+        case 2: editCustomer();  break;
+        case 3: deleteCustomer();break;
         case 4: break;
         }
-        if (sub != 4) pauseScreen();
     }
 }
 
@@ -293,10 +566,7 @@ void customerManagementLoop(bool showListFirst) {
 // ===============================
 int main() {
 
-    // Load customer database first
     loadCustomersFromCustomerTxt();
-
-    // Load DVD rentals second
     loadDVDsFromCustDat();
 
     int choice = 0;
@@ -309,17 +579,15 @@ int main() {
 
         switch (choice) {
 
-        case 1: {   // List Customers, then management
+        case 1:
             customerManagementLoop(true);
             break;
-        }
 
-        case 2: {   // Directly open Customer Management (no list first)
+        case 2:
             customerManagementLoop(false);
             break;
-        }
 
-        case 3: {   // Search For Customer
+        case 3: {
             int s = 0;
             while (s != 3) {
                 system("clear");
@@ -331,11 +599,10 @@ int main() {
 
                 switch (s) {
 
-                case 1: { // Search by Customer ID
+                case 1: {
                     int id;
                     cout << "Enter Customer ID: ";
 
-                    // Validate numeric input
                     while (!(cin >> id)) {
                         cout << "Invalid ID. Enter numeric Customer ID: ";
                         cin.clear();
@@ -344,12 +611,9 @@ int main() {
 
                     customerType* cust = customerDB.getCustomerById(id);
 
-                    if (cust == nullptr)
-                    {
+                    if (!cust)
                         cout << "Customer NOT FOUND\n";
-                    }
-                    else
-                    {
+                    else {
                         cout << "\nCustomer Information:\n";
                         cust->printFullInfo();
                     }
@@ -358,7 +622,7 @@ int main() {
                     break;
                 }
 
-                case 2: { // Search by Customer Name
+                case 2: {
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -368,12 +632,9 @@ int main() {
 
                     customerType* cust = customerDB.getCustomerByName(name);
 
-                    if (cust == nullptr)
-                    {
+                    if (!cust)
                         cout << "Customer NOT FOUND\n";
-                    }
-                    else
-                    {
+                    else {
                         cout << "\nCustomer Information:\n";
                         cust->printFullInfo();
                     }
@@ -389,7 +650,7 @@ int main() {
             break;
         }
 
-        case 4: {   // Rent DVD
+        case 4: {
             header("RENT DVD");
 
             int id;
@@ -410,11 +671,13 @@ int main() {
 
             customerDB.custRentDVD(id, title);
 
+            saveAllData();
+
             pauseScreen();
             break;
         }
 
-        case 5: {   // Return DVD
+        case 5: {
             header("RETURN DVD");
 
             int id;
@@ -434,6 +697,8 @@ int main() {
             getline(cin, title);
 
             customerDB.custReturnDVD(id, title);
+
+            saveAllData();
 
             pauseScreen();
             break;
